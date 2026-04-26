@@ -1,7 +1,6 @@
 'use client'
 
 import { useApp } from '@/contexts/AppContext'
-import { ProjectAuthProvider } from '@/contexts/ProjectAuthContext'
 import { Dashboard } from '@/components/Dashboard'
 import { Projects } from '@/components/Projects'
 import { Reports } from '@/components/Reports'
@@ -31,30 +30,28 @@ export default function Home() {
   }
 
   return (
-    <ProjectAuthProvider>
-      <div className="min-h-screen bg-background">
-        {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-          {/* Logo - Only show on dashboard */}
-          {currentPage === 'dashboard' && (
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-primary rounded-lg">
-                <Building2 className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-primary">BinaCore</h1>
-                <p className="text-xs text-muted-foreground">Construction Management</p>
-              </div>
+    <div className="min-h-screen bg-background">
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+        {/* Logo - Only show on dashboard */}
+        {currentPage === 'dashboard' && (
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-primary rounded-lg">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
-          )}
+            <div>
+              <h1 className="text-2xl font-bold text-primary">BinaCore</h1>
+              <p className="text-xs text-muted-foreground">Construction Management</p>
+            </div>
+          </div>
+        )}
 
-          {/* Page Content */}
-          {renderPage()}
-        </main>
+        {/* Page Content */}
+        {renderPage()}
+      </main>
 
-        {/* Bottom Navigation */}
-        <BottomNav />
-      </div>
-    </ProjectAuthProvider>
+      {/* Bottom Navigation */}
+      <BottomNav />
+    </div>
   )
 }
