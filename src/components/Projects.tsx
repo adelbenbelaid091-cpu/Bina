@@ -46,48 +46,7 @@ interface Floor {
 export function Projects() {
   const { t } = useApp()
   const { isProjectUnlocked, unlockProject } = useProjectAuth()
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: '1',
-      projectCode: 'PRJ-2024-001',
-      name: 'Residential Tower A',
-      description: '12-story residential building with parking',
-      password: '1234',
-      blocks: [
-        {
-          id: 'b1',
-          projectId: '1',
-          name: 'Block A',
-          floors: [
-            {
-              id: 'f1',
-              blockId: 'b1',
-              floorNumber: 1,
-              floorName: 'Ground Floor',
-              notes: 'Standard specifications',
-              concreteDate: '2024-01-15T08:00:00',
-              concreteReview: 'Approved',
-              groOeuvreProgress: 100,
-              cetProgress: 80,
-              cesProgress: 60,
-            },
-            {
-              id: 'f2',
-              blockId: 'b1',
-              floorNumber: 2,
-              floorName: 'First Floor',
-              notes: 'Reinforcement completed',
-              concreteDate: null,
-              concreteReview: null,
-              groOeuvreProgress: 75,
-              cetProgress: 50,
-              cesProgress: 40,
-            },
-          ],
-        },
-      ],
-    },
-  ])
+  const [projects, setProjects] = useState<Project[]>([])
 
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false)
   const [showAddBlockDialog, setShowAddBlockDialog] = useState(false)

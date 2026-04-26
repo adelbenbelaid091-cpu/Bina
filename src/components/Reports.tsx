@@ -34,42 +34,9 @@ export function Reports() {
   const { t } = useApp()
   const { isProjectUnlocked, unlockProject } = useProjectAuth()
 
-  // Projects with their passwords (should match projects in Projects.tsx)
-  const projects: ProjectWithPassword[] = [
-    { id: '1', name: 'Residential Tower A', password: '1234' },
-    { id: '2', name: 'Commercial Complex B' },
-    { id: '3', name: 'Villa Project C' },
-  ]
+  const projects: ProjectWithPassword[] = []
 
-  const [reports, setReports] = useState<Report[]>([
-    {
-      id: '1',
-      projectId: '1',
-      projectName: 'Residential Tower A',
-      type: 'PV_Visite',
-      title: 'Weekly Site Visit - Week 4',
-      description: 'Regular site inspection conducted on 15th January 2024. All structural works are progressing according to schedule.',
-      createdAt: '2024-01-15T14:30:00',
-    },
-    {
-      id: '2',
-      projectId: '1',
-      projectName: 'Residential Tower A',
-      type: 'PV_Constat',
-      title: 'Issue Report - Floor 5',
-      description: 'Minor cracking observed on floor 5. Recommended reinforcement review and repair work scheduled.',
-      createdAt: '2024-01-12T09:15:00',
-    },
-    {
-      id: '3',
-      projectId: '2',
-      projectName: 'Commercial Complex B',
-      type: 'PV_Visite',
-      title: 'Foundation Inspection',
-      description: 'Foundation work completed and inspected. Ready to proceed with ground floor construction.',
-      createdAt: '2024-01-10T11:00:00',
-    },
-  ])
+  const [reports, setReports] = useState<Report[]>([])
 
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)

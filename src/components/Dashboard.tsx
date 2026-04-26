@@ -17,19 +17,9 @@ interface Activity {
 
 export function Dashboard() {
   const { t } = useApp()
-  const [projects, setProjects] = useState([
-    { id: '1', name: 'Residential Tower A', progress: 75, floors: 12 },
-    { id: '2', name: 'Commercial Complex B', progress: 45, floors: 8 },
-    { id: '3', name: 'Villa Project C', progress: 90, floors: 3 },
-  ])
+  const [projects, setProjects] = useState([])
 
-  const [activities] = useState<Activity[]>([
-    { id: '1', project: 'Residential Tower A', action: 'Floor 8 concrete completed', time: '2 hours ago' },
-    { id: '2', project: 'Commercial Complex B', action: 'Floor 4 reinforcement started', time: '4 hours ago' },
-    { id: '3', project: 'Villa Project C', action: 'All floors completed', time: '1 day ago' },
-    { id: '4', project: 'Residential Tower A', action: 'New floor added', time: '2 days ago' },
-    { id: '5', project: 'Commercial Complex B', action: 'Site visit completed', time: '3 days ago' },
-  ])
+  const [activities] = useState<Activity[]>([])
 
   const quickActions = [
     { icon: Plus, label: t('addProject'), color: 'bg-accent' },
@@ -87,9 +77,7 @@ export function Dashboard() {
                 <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {Math.round(projects.reduce((acc, p) => acc + p.progress, 0) / projects.length)}%
-                </p>
+                <p className="text-2xl font-bold text-foreground">0%</p>
                 <p className="text-xs text-muted-foreground">Avg Progress</p>
               </div>
             </div>
@@ -117,7 +105,7 @@ export function Dashboard() {
                 <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">3</p>
+                <p className="text-2xl font-bold text-foreground">0</p>
                 <p className="text-xs text-muted-foreground">Pending Reports</p>
               </div>
             </div>
@@ -156,26 +144,33 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {projects.map((project) => (
-              <div key={project.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-foreground">{project.name}</h3>
-                    <p className="text-xs text-muted-foreground">{project.floors} floors</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-lg font-bold ${getStatusColor(project.progress)}`}>
-                      {project.progress}%
-                    </span>
-                    {getStatusBadge(project.progress)}
-                  </div>
-                </div>
-                <Progress
-                  value={project.progress}
-                  className="h-2"
-                />
+            {projects.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No projects yet. Create your first project to get started!</p>
               </div>
-            ))}
+            ) : (
+              projects.map((project) => (
+                <div key={project.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-foreground">{project.name}</h3>
+                      <p className="text-xs text-muted-foreground">{project.floors} floors</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-lg font-bold ${getStatusColor(project.progress)}`}>
+                        {project.progress}%
+                      </span>
+                      {getStatusBadge(project.progress)}
+                    </div>
+                  </div>
+                  <Progress
+                    value={project.progress}
+                    className="h-2"
+                  />
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
@@ -187,16 +182,23 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="w-2 h-2 mt-2 rounded-full bg-accent" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{activity.project}</p>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
+            {activities.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No recent activities yet.</p>
               </div>
-            ))}
+            ) : (
+              activities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-accent" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{activity.action}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{activity.project}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

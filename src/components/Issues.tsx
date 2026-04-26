@@ -38,52 +38,9 @@ export function Issues() {
   const { t } = useApp()
   const { isProjectUnlocked, unlockProject } = useProjectAuth()
 
-  // Projects with their passwords (should match projects in Projects.tsx)
-  const projects: ProjectWithPassword[] = [
-    { id: '1', name: 'Residential Tower A', password: '1234' },
-    { id: '2', name: 'Commercial Complex B' },
-    { id: '3', name: 'Villa Project C' },
-  ]
+  const projects: ProjectWithPassword[] = []
 
-  const [issues, setIssues] = useState<Issue[]>([
-    {
-      id: '1',
-      projectId: '1',
-      projectName: 'Residential Tower A',
-      title: 'Crack in concrete - Floor 5',
-      description: 'Minor crack observed in the slab of floor 5. Needs investigation and repair.',
-      type: 'structural',
-      severity: 'medium',
-      status: 'open',
-      createdAt: '2024-01-16T10:30:00',
-      floor: 'Floor 5',
-    },
-    {
-      id: '2',
-      projectId: '1',
-      projectName: 'Residential Tower A',
-      title: 'Safety equipment missing',
-      description: 'Hard hats and safety vests not available for workers on floor 3.',
-      type: 'safety',
-      severity: 'high',
-      status: 'in_progress',
-      createdAt: '2024-01-15T14:00:00',
-      floor: 'Floor 3',
-    },
-    {
-      id: '3',
-      projectId: '2',
-      projectName: 'Commercial Complex B',
-      title: 'Material delay - Steel bars',
-      description: 'Steel bars delivery delayed by 2 days.',
-      type: 'material',
-      severity: 'low',
-      status: 'resolved',
-      createdAt: '2024-01-12T09:00:00',
-      resolvedAt: '2024-01-14T16:00:00',
-      floor: 'Foundation',
-    },
-  ])
+  const [issues, setIssues] = useState<Issue[]>([])
 
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null)
