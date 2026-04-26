@@ -4,6 +4,7 @@ import { useApp } from '@/contexts/AppContext'
 import { Dashboard } from '@/components/Dashboard'
 import { Projects } from '@/components/Projects'
 import { Reports } from '@/components/Reports'
+import { Issues } from '@/components/Issues'
 import { Settings } from '@/components/Settings'
 import { BottomNav } from '@/components/BottomNav'
 import { Building2 } from 'lucide-react'
@@ -17,6 +18,8 @@ export default function Home() {
         return <Dashboard />
       case 'projects':
         return <Projects />
+      case 'issues':
+        return <Issues />
       case 'reports':
         return <Reports />
       case 'settings':

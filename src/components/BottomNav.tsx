@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, FolderOpen, FileText, Settings } from 'lucide-react'
+import { Home, FolderOpen, FileText, Settings, AlertTriangle } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { cn } from '@/lib/utils'
 
@@ -10,6 +10,7 @@ export function BottomNav() {
   const navItems = [
     { id: 'dashboard', icon: Home, label: t('dashboard') },
     { id: 'projects', icon: FolderOpen, label: t('projects') },
+    { id: 'issues', icon: AlertTriangle, label: t('issues') },
     { id: 'reports', icon: FileText, label: t('reports') },
     { id: 'settings', icon: Settings, label: t('settings') },
   ]

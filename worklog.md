@@ -246,9 +246,10 @@ The BinaCore application is **fully functional** and ready for use. All core fea
 
 ✅ Dashboard with statistics and activity tracking
 ✅ Projects with floor management
+✅ Issues/Problems module (NEW)
 ✅ Activity tracking (reinforcement & concrete)
 ✅ Report generation and sharing
-✅ Multi-language support (EN/FR)
+✅ Multi-language support (EN/FR/AR)
 ✅ Light/Dark theme switching
 ✅ Responsive mobile-first design
 ✅ Backend API routes
@@ -256,3 +257,64 @@ The BinaCore application is **fully functional** and ready for use. All core fea
 ✅ Professional UI with shadcn/ui components
 
 The application is running successfully on the development server with all routes functioning correctly.
+
+---
+
+## Recent Updates (Jan 2025)
+
+### Issues/Problems Module - Complete Implementation
+
+#### Features Added
+- ✅ Create, edit, and delete site issues
+- ✅ Issue details: title, description, type, severity, status
+- ✅ Issue types: Structural (إنشائي), Safety (السلامة), Material (المواد), Quality (الجودة), Other (أخرى)
+- ✅ Severity levels: Low (منخفضة), Medium (متوسطة), High (عالية), Critical (حرجة)
+- ✅ Status tracking: Open (مفتوحة), In Progress (قيد المعالجة), Resolved (تم الحل)
+- ✅ Date and time for issue creation and resolution
+- ✅ Floor/location assignment for issues
+- ✅ Project association
+- ✅ Filter by status and severity
+- ✅ Quick status update buttons (Resolve, In Progress)
+- ✅ Visual severity badges with color coding
+- ✅ Statistics: Total issues, Open issues, Resolved issues
+- ✅ Status icons for visual indication
+
+#### Database Schema Update
+- ✅ Added Issue model to Prisma schema with relations to Project
+- ✅ Fields: id, projectId, title, description, type, severity, status, floor, createdAt, resolvedAt, updatedAt
+- ✅ Cascading delete when project is deleted
+
+#### API Routes Created
+- ✅ GET /api/issues - List all issues with filtering by projectId, status, and severity
+- ✅ POST /api/issues - Create new issue
+- ✅ GET /api/issues/[id] - Get single issue by ID
+- ✅ PUT /api/issues/[id] - Update issue (status, severity, description, etc.)
+- ✅ DELETE /api/issues/[id] - Delete issue by ID
+
+#### Language Support Enhancement
+- ✅ Added Arabic (العربية) language support
+- ✅ Complete translations for Issues module in English, French, and Arabic
+- ✅ Updated language selector in Settings to include Arabic with 🇸🇦 flag
+- ✅ RTL language support ready for Arabic interface
+
+#### UI Components Implemented
+- ✅ Issues page with statistics cards (Total, Open, Resolved)
+- ✅ Filter controls for status (All, Open, In Progress, Resolved) and severity (All, Low, Medium, High, Critical)
+- ✅ Issue cards with detailed information display
+- ✅ Create Issue dialog with all required fields
+- ✅ Quick action buttons for status updates (Resolve, Mark as In Progress)
+- ✅ Color-coded severity badges (Critical: Red, High: Orange, Medium: Yellow, Low: Green)
+- ✅ Status icons (Open: AlertTriangle, In Progress: Clock, Resolved: CheckCircle2)
+- ✅ Project and floor/location information display
+- ✅ Empty state with icon when no issues exist
+
+#### Navigation Update
+- ✅ Added Issues tab to bottom navigation (AlertTriangle icon)
+- ✅ Updated to 5-tab navigation layout: Dashboard | Projects | Issues | Reports | Settings
+- ✅ Active state styling for Issues tab
+
+#### Updated Statistics
+- **Total Languages Supported**: 3 (English, Français, العربية)
+- **Total Navigation Tabs**: 5
+- **Total Pages**: 5 (Dashboard, Projects, Issues, Reports, Settings)
+- **Total API Endpoints**: 20+ (including Issues CRUD)

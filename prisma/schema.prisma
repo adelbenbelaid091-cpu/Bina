@@ -21,6 +21,7 @@ model Project {
   reports   Report[]
   tasks     CESTask[]
   activities Activity[]
+  issues    Issue[]
 }
 
 model Floor {
@@ -76,9 +77,25 @@ model Report {
 
 model AppSettings {
   id          String   @id @default(cuid())
-  language    String   @default("en") // "en" or "fr"
+  language    String   @default("en") // "en" or "fr" or "ar"
   theme       String   @default("light") // "light" or "dark"
   notifications Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Issue {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  type        String   @default("other") // "structural", "safety", "material", "quality", "other"
+  severity    String   @default("medium") // "low", "medium", "high", "critical"
+  status      String   @default("open") // "open", "in_progress", "resolved"
+  floor       String?
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  updatedAt   DateTime @updatedAt
+
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
