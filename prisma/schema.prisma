@@ -11,56 +11,43 @@ datasource db {
 
 model Project {
   id          String   @id @default(cuid())
+  projectCode String   @unique
   name        String
   description String?
-  floorsCount Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  floors    Floor[]
-  reports   Report[]
-  tasks     CESTask[]
-  activities Activity[]
-  issues    Issue[]
+  blocks      Block[]
+  reports     Report[]
+  issues      Issue[]
+}
+
+model Block {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  floors      Floor[]
 }
 
 model Floor {
-  id          String      @id @default(cuid())
-  floorNumber Int
-  projectId   String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String   @id @default(cuid())
+  blockId             String
+  floorNumber         Int
+  floorName           String?
+  notes               String?
+  concreteDate        DateTime?
+  concreteReview      String?
+  groOeuvreProgress   Int      @default(0)
+  cetProgress         Int      @default(0)
+  cesProgress         Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  project    Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  activities Activity[]
-}
-
-model Activity {
-  id          String   @id @default(cuid())
-  floorId     String
-  type        String   // "reinforcement" or "concrete"
-  status      String   @default("not_started") // "not_started", "in_progress", "completed"
-  dateTime    DateTime?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  floor      Floor     @relation(fields: [floorId], references: [id], onDelete: Cascade)
-  project    Project   @relation(fields: [floorId], references: [id], onDelete: Cascade)
-}
-
-model CESTask {
-  id          String   @id @default(cuid())
-  projectId   String
-  title       String
-  type        String   // "CET" or "CES"
-  description String?
-  progress    Int      @default(0) // 0-100
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
 }
 
 model Report {
@@ -72,7 +59,7 @@ model Report {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model AppSettings {
@@ -97,5 +84,5 @@ model Issue {
   resolvedAt  DateTime?
   updatedAt   DateTime @updatedAt
 
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
