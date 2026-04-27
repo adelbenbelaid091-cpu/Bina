@@ -5,9 +5,10 @@ import type { ProjectUpdate } from '@/types/supabase'
 // GET /api/projects/[id] - Get a single project with blocks and floors
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { data: project, error } = await supabase
       .from('projects')
       .select(`
@@ -17,7 +18,7 @@ export async function GET(
           floors (*)
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) throw error
@@ -42,16 +43,17 @@ export async function GET(
 // PATCH /api/projects/[id] - Update a project
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const updateData: ProjectUpdate = body
 
     const { data: project, error } = await supabase
       .from('projects')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -70,13 +72,14 @@ export async function PATCH(
 // DELETE /api/projects/[id] - Delete a project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabase
       .from('projects')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 

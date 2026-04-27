@@ -68,7 +68,7 @@ export function ProjectAuthProvider({ children }: { children: ReactNode }) {
         lockProject,
       }}
     >
-      {children}
+      {mounted ? children : null}
     </ProjectAuthContext.Provider>
   )
 }

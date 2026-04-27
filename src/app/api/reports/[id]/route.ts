@@ -5,16 +5,17 @@ import type { ReportUpdate } from '@/types/supabase'
 // PATCH /api/reports/[id] - Update a report
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const updateData: ReportUpdate = body
 
     const { data: report, error } = await supabase
       .from('reports')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -33,13 +34,14 @@ export async function PATCH(
 // DELETE /api/reports/[id] - Delete a report
 export async function DELETE(
   request: NextRequest,
-  { params }: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabase
       .from('reports')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 

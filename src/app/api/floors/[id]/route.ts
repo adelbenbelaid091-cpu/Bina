@@ -5,13 +5,14 @@ import type { FloorUpdate } from '@/types/supabase'
 // GET /api/floors/[id] - Get a single floor
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { data: floor, error } = await supabase
       .from('floors')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) throw error
@@ -36,16 +37,17 @@ export async function GET(
 // PATCH /api/floors/[id] - Update a floor
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const updateData: FloorUpdate = body
 
     const { data: floor, error } = await supabase
       .from('floors')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -64,13 +66,14 @@ export async function PATCH(
 // DELETE /api/floors/[id] - Delete a floor
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabase
       .from('floors')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 

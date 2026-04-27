@@ -5,16 +5,17 @@ import type { BlockUpdate } from '@/types/supabase'
 // PATCH /api/blocks/[id] - Update a block
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const updateData: BlockUpdate = body
 
     const { data: block, error } = await supabase
       .from('blocks')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -33,13 +34,14 @@ export async function PATCH(
 // DELETE /api/blocks/[id] - Delete a block
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { error } = await supabase
       .from('blocks')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 
