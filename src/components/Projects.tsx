@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Building2, ChevronDown, ChevronRight, Layers, CheckCircle2, Trash2, Lock, LockIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ interface Project {
   projectCode: string
   name: string
   description: string
-  password?: string
+  password: string
   blocks: Block[]
 }
 
@@ -47,6 +47,7 @@ export function Projects() {
   const { t } = useApp()
   const { isProjectUnlocked, unlockProject } = useProjectAuth()
   const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(false)
 
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false)
   const [showAddBlockDialog, setShowAddBlockDialog] = useState(false)
@@ -84,103 +85,185 @@ export function Projects() {
     cesProgress: 0,
   })
 
-  const handleCreateProject = () => {
-    const newProject: Project = {
-      id: Date.now().toString(),
-      projectCode: projectFormData.projectCode,
-      name: projectFormData.name,
-      description: projectFormData.description,
-      password: projectFormData.password || undefined,
-      blocks: [],
-    }
+  // Load projects from Supabase
+  useEffect(() => {
+    loadProjects()
+  }, [])
 
-    setProjects([newProject, ...projects])
-    setShowCreateProjectDialog(false)
-    setProjectFormData({ projectCode: '', name: '', description: '', password: '' })
-    toast({
-      title: t('success'),
-      description: 'Project created successfully',
-    })
-  }
-
-  const handleCreateBlock = () => {
-    if (!selectedProjectForBlock) return
-
-    const newBlock: Block = {
-      id: 'block-' + Date.now(),
-      projectId: selectedProjectForBlock,
-      name: blockFormData.name,
-      floors: [],
-    }
-
-    setProjects(projects.map((project) => {
-      if (project.id === selectedProjectForBlock) {
-        return {
-          ...project,
-          blocks: [...project.blocks, newBlock],
-        }
+  const loadProjects = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/projects')
+      const data = await response.json()
+      
+      if (data.projects) {
+        setProjects(data.projects)
       }
-      return project
-    }))
-
-    setShowAddBlockDialog(false)
-    setBlockFormData({ name: '' })
-    setSelectedProjectForBlock(null)
-    toast({
-      title: t('success'),
-      description: 'Block created successfully',
-    })
+    } catch (error) {
+      console.error('Failed to load projects:', error)
+      toast({
+        title: t('error'),
+        description: 'Failed to load projects',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleCreateFloor = () => {
-    if (!selectedBlockForFloor) return
-
-    const newFloor: Floor = {
-      id: 'floor-' + Date.now(),
-      blockId: selectedBlockForFloor,
-      floorNumber: floorFormData.floorNumber,
-      floorName: floorFormData.floorName || null,
-      notes: floorFormData.notes || null,
-      concreteDate: floorFormData.concreteDate || null,
-      concreteReview: floorFormData.concreteReview || null,
-      groOeuvreProgress: floorFormData.groOeuvreProgress,
-      cetProgress: floorFormData.cetProgress,
-      cesProgress: floorFormData.cesProgress,
-    }
-
-    setProjects(projects.map((project) => {
-      const updatedBlocks = project.blocks.map((block) => {
-        if (block.id === selectedBlockForFloor) {
-          return {
-            ...block,
-            floors: [...block.floors, newFloor],
-          }
-        }
-        return block
+  const handleCreateProject = async () => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectCode: projectFormData.projectCode,
+          name: projectFormData.name,
+          description: projectFormData.description,
+          password: projectFormData.password || null,
+        }),
       })
 
-      return {
-        ...project,
-        blocks: updatedBlocks,
-      }
-    }))
+      const data = await response.json()
 
-    setShowAddFloorDialog(false)
-    setFloorFormData({
-      floorNumber: 1,
-      floorName: '',
-      notes: '',
-      concreteDate: '',
-      concreteReview: '',
-      groOeuvreProgress: 0,
-      cetProgress: 0,
-      cesProgress: 0,
-    })
-    setSelectedBlockForFloor(null)
-    toast({
-      title: t('success'),
-      description: 'Floor created successfully',
-    })
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      await loadProjects()
+      setShowCreateProjectDialog(false)
+      setProjectFormData({ projectCode: '', name: '', description: '', password: '' })
+      toast({
+        title: t('success'),
+        description: 'Project created successfully',
+      })
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to create project',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCreateBlock = async () => {
+    if (!selectedProjectForBlock) return
+
+    try {
+      const response = await fetch(`/api/projects/${selectedProjectForBlock}/blocks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: blockFormData.name,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      await loadProjects()
+      setShowAddBlockDialog(false)
+      setBlockFormData({ name: '' })
+      setSelectedProjectForBlock(null)
+      toast({
+        title: t('success'),
+        description: 'Block created successfully',
+      })
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to create block',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCreateFloor = async () => {
+    if (!selectedBlockForFloor) return
+
+    try {
+      const response = await fetch(`/api/projects/${selectedBlockForFloor}/floors`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          floorNumber: floorFormData.floorNumber,
+          floorName: floorFormData.floorName || null,
+          notes: floorFormData.notes || null,
+          concreteDate: floorFormData.concreteDate || null,
+          concreteReview: floorFormData.concreteReview || null,
+          groOeuvreProgress: floorFormData.groOeuvreProgress,
+          cetProgress: floorFormData.cetProgress,
+          cesProgress: floorFormData.cesProgress,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      await loadProjects()
+      setShowAddFloorDialog(false)
+      setFloorFormData({
+        floorNumber: 1,
+        floorName: '',
+        notes: '',
+        concreteDate: '',
+        concreteReview: '',
+        groOeuvreProgress: 0,
+        cetProgress: 0,
+        cesProgress: 0,
+      })
+      setSelectedBlockForFloor(null)
+      toast({
+        title: t('success'),
+        description: 'Floor created successfully',
+      })
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to create floor',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!itemToDelete || !deleteType) return
+
+    try {
+      let url = ''
+      if (deleteType === 'project') {
+        url = `/api/projects/${itemToDelete.projectId}`
+      } else if (deleteType === 'block') {
+        url = `/api/projects/${itemToDelete.projectId}/blocks/${itemToDelete.blockId}`
+      } else if (deleteType === 'floor') {
+        url = `/api/projects/${itemToDelete.projectId}/floors/${itemToDelete.floorId}`
+      }
+
+      const response = await fetch(url, {
+        method: 'DELETE',
+      })
+
+      await loadProjects()
+      setShowDeleteDialog(false)
+      setDeleteType(null)
+      setItemToDelete(null)
+      toast({
+        title: t('success'),
+        description: `${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} deleted successfully`,
+      })
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to delete',
+        variant: 'destructive',
+      })
+    }
   }
 
   const toggleBlockExpanded = (blockId: string) => {
@@ -191,66 +274,6 @@ export function Projects() {
       newExpanded.add(blockId)
     }
     setExpandedBlocks(newExpanded)
-  }
-
-  const handleDelete = () => {
-    if (!itemToDelete || !deleteType) return
-
-    if (deleteType === 'project') {
-      setProjects(projects.filter(p => p.id !== itemToDelete.projectId))
-      toast({
-        title: t('success'),
-        description: 'Project deleted successfully',
-      })
-    } else if (deleteType === 'block') {
-      setProjects(projects.map(project => {
-        if (project.id === itemToDelete.projectId) {
-          return {
-            ...project,
-            blocks: project.blocks.filter(b => b.id !== itemToDelete.blockId)
-          }
-        }
-        return project
-      }))
-      toast({
-        title: t('success'),
-        description: 'Block deleted successfully',
-      })
-    } else if (deleteType === 'floor') {
-      setProjects(projects.map(project => {
-        if (project.id === itemToDelete.projectId) {
-          const updatedBlocks = project.blocks.map(block => {
-            if (block.id === itemToDelete.blockId) {
-              return {
-                ...block,
-                floors: block.floors.filter(f => f.id !== itemToDelete.floorId)
-              }
-            }
-            return block
-          })
-          return { ...project, blocks: updatedBlocks }
-        }
-        return project
-      }))
-      toast({
-        title: t('success'),
-        description: 'Floor deleted successfully',
-      })
-    }
-
-    setShowDeleteDialog(false)
-    setDeleteType(null)
-    setItemToDelete(null)
-  }
-
-  const confirmDelete = (type: 'project' | 'block' | 'floor', projectId: string, blockId?: string, floorId?: string) => {
-    setDeleteType(type)
-    setItemToDelete({ projectId, blockId, floorId })
-    setShowDeleteDialog(true)
-  }
-
-  const calculateOverallProgress = (floor: Floor) => {
-    return Math.round((floor.groOeuvreProgress + floor.cetProgress + floor.cesProgress) / 3)
   }
 
   const handleUnlockProject = () => {
@@ -295,6 +318,27 @@ export function Projects() {
     setExpandedProjects(newExpanded)
   }
 
+  const calculateOverallProgress = (floor: Floor) => {
+    return Math.round((floor.groOeuvreProgress + floor.cetProgress + floor.cesProgress) / 3)
+  }
+
+  const confirmDelete = (type: 'project' | 'block' | 'floor', projectId: string, blockId?: string, floorId?: string) => {
+    setDeleteType(type)
+    setItemToDelete({ projectId, blockId, floorId })
+    setShowDeleteDialog(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading projects...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
@@ -309,89 +353,99 @@ export function Projects() {
       </div>
 
       <div className="space-y-4">
-        {projects.map((project) => (
-          <Card key={project.id} className="shadow-sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 cursor-pointer" onClick={() => toggleProjectExpanded(project.id)}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <Badge variant="outline">{project.projectCode}</Badge>
-                    {project.password && (
-                      <Badge variant="secondary" className="gap-1">
-                        <LockIcon className="w-3 h-3" />
-                        {isProjectUnlocked(project.id, project.password) ? t('projectUnlocked') : t('projectProtected')}
-                      </Badge>
-                    )}
+        {projects.length === 0 ? (
+          <Card className="shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Building2 className="w-16 h-16 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No projects yet</p>
+              <p className="text-sm text-muted-foreground">Create your first project to get started</p>
+            </CardContent>
+          </Card>
+        ) : (
+          projects.map((project) => (
+            <Card key={project.id} className="shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 cursor-pointer" onClick={() => toggleProjectExpanded(project.id)}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building2 className="w-5 h-5 text-primary" />
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <Badge variant="outline">{project.projectCode}</Badge>
+                      {project.password && (
+                        <Badge variant="secondary" className="gap-1">
+                          <LockIcon className="w-3 h-3" />
+                          {isProjectUnlocked(project.id, project.password) ? t('projectUnlocked') : t('projectProtected')}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{project.description}</p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <span>{project.blocks.length} {project.blocks.length === 1 ? 'Block' : 'Blocks'}</span>
+                      <span>•</span>
+                      <span>
+                        {project.blocks.reduce((acc, block) => acc + block.floors.length, 0)} Floors Total
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">{project.description}</p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                    <span>{project.blocks.length} {project.blocks.length === 1 ? 'Block' : 'Blocks'}</span>
-                    <span>•</span>
-                    <span>
-                      {project.blocks.reduce((acc, block) => acc + block.floors.length, 0)} Floors Total
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => confirmDelete('project', project.id)}
-                    title={t('delete')}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
-                  {project.password && !isProjectUnlocked(project.id, project.password) ? (
+                  <div className="flex gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => toggleProjectExpanded(project.id)}
-                      title="Unlock project"
-                      className="text-primary hover:text-primary"
+                      onClick={() => confirmDelete('project', project.id)}
+                      title={t('delete')}
+                      className="text-destructive hover:text-destructive"
                     >
-                      <Lock className="w-5 h-5" />
+                      <Trash2 className="w-5 h-5" />
                     </Button>
-                  ) : (
-                    <Button variant="ghost" size="icon" onClick={() => toggleProjectExpanded(project.id)}>
-                      {expandedProjects.has(project.id) ? (
-                        <ChevronDown className="w-5 h-5" />
-                      ) : (
-                        <ChevronRight className="w-5 h-5" />
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-
-            {expandedProjects.has(project.id) && (
-              <CardContent className="pt-0 space-y-3">
-                {project.blocks.length === 0 ? (
-                  <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
-                    <Layers className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-muted-foreground mb-4">No blocks yet</p>
-                    <Button
-                      onClick={() => {
-                        setSelectedProjectForBlock(project.id)
-                        setShowAddBlockDialog(true)
-                      }}
-                      className="gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      {t('addBlock')}
-                    </Button>
+                    {project.password && !isProjectUnlocked(project.id, project.password) ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleProjectExpanded(project.id)}
+                        title="Unlock project"
+                        className="text-primary hover:text-primary"
+                      >
+                        <Lock className="w-5 h-5" />
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" size="icon" onClick={() => toggleProjectExpanded(project.id)}>
+                        {expandedProjects.has(project.id) ? (
+                          <ChevronDown className="w-5 h-5" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5" />
+                        )}
+                      </Button>
+                    )}
                   </div>
-                ) : (
-                  project.blocks.map((block) => (
-                    <div key={block.id} className="border border-border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 cursor-pointer" onClick={() => toggleBlockExpanded(block.id)}>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground">{block.name}</h3>
-                            <Badge variant="secondary">{block.floors.length} Floors</Badge>
+                </div>
+              </CardHeader>
+
+              {expandedProjects.has(project.id) && (
+                <CardContent className="pt-0 space-y-3">
+                  {project.blocks.length === 0 ? (
+                    <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+                      <Layers className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground mb-4">No blocks yet</p>
+                      <Button
+                        onClick={() => {
+                          setSelectedProjectForBlock(project.id)
+                          setShowAddBlockDialog(true)
+                        }}
+                        className="gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {t('addBlock')}
+                      </Button>
+                    </div>
+                  ) : (
+                    project.blocks.map((block) => (
+                      <div key={block.id} className="border border-border rounded-lg p-4 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 cursor-pointer" onClick={() => toggleBlockExpanded(block.id)}>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-foreground">{block.name}</h3>
+                              <Badge variant="secondary">{block.floors.length} Floors</Badge>
+                            </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -557,12 +611,12 @@ export function Projects() {
                         </div>
                       )}
                     </div>
-                  ))
-                )}
-              </CardContent>
-            )}
-          </Card>
-        ))}
+                  ))}
+                </CardContent>
+              )}
+            </Card>
+          ))
+        )}
       </div>
 
       <Dialog open={showCreateProjectDialog} onOpenChange={setShowCreateProjectDialog}>
@@ -751,7 +805,6 @@ export function Projects() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -777,7 +830,6 @@ export function Projects() {
         </DialogContent>
       </Dialog>
 
-      {/* Password Verification Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent>
           <DialogHeader>
